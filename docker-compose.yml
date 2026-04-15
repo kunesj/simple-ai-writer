@@ -1,12 +1,28 @@
 services:
-  app:
-    build: .
+  simple-ai-writer:
+    container_name: simple-ai-writer
+    restart: always
+    
+    build:
+      context: .
+      dockerfile: .docker/Dockerfile
+    image: local/simple-ai-writer
+    pull_policy: never
+
     ports:
       - "3000:3000"
-    volumes:
-      - ./data:/app/data
     environment:
+      - UID=1000
+      - GID=1000
       - NODE_ENV=production
       - VITE_OPENAI_API_KEY=${VITE_OPENAI_API_KEY}
       - VITE_MODEL_NAME=${VITE_MODEL_NAME}
       - VITE_OPENAI_BASE_URL=${VITE_OPENAI_BASE_URL}
+    volumes:
+      - ./data:/app/data
+
+    logging:
+      driver:  json-file
+      options:
+        max-file: "3"
+        max-size: "10M"
