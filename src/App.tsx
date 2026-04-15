@@ -231,7 +231,7 @@ export default function App() {
             <div className="flex justify-end">
               <button 
                 onClick={() => setErrorMessage(null)}
-                className="px-4 py-2 bg-accent-primary text-white rounded-md hover:bg-accent-primary/90 text-sm font-semibold"
+                className="px-4 py-2 bg-accent-primary text-white rounded-md hover:bg-accent-primary/90 text-sm font-semibold cursor-pointer"
               >
                 Close
               </button>

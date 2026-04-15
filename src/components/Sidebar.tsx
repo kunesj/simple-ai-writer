@@ -147,21 +147,21 @@ export function Sidebar({ conversations, activeId, onSelect, onNew, onDelete, on
                     <span className="truncate">{conv.title || 'Untitled Chat'}</span>
                   </div>
                   <div className="relative" ref={openMenuId === conv.id ? menuRef : null}>
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setOpenMenuId(openMenuId === conv.id ? null : conv.id);
-                      }}
-                      className="p-1 text-text-muted hover:text-accent-primary opacity-0 group-hover:opacity-100 transition-opacity"
-                      title="More options"
-                    >
+<button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenMenuId(openMenuId === conv.id ? null : conv.id);
+                        }}
+                        className="p-1 text-text-muted hover:text-accent-primary opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                        title="More options"
+                      >
                       <MoreVertical size={14} />
                     </button>
                     {openMenuId === conv.id && (
                       <div className="absolute right-0 top-full mt-1 bg-white border border-border-color shadow-lg rounded-md py-1 z-10 w-40">
                         <button
                           onClick={() => handleStartRename(conv)}
-                          className="w-full px-3 py-2 text-left text-xs hover:bg-gray-50 flex items-center gap-2 text-text-main"
+                          className="w-full px-3 py-2 text-left text-xs hover:bg-gray-50 flex items-center gap-2 text-text-main cursor-pointer"
                         >
                           <Pencil size={12} />
                           Rename
@@ -171,7 +171,7 @@ export function Sidebar({ conversations, activeId, onSelect, onNew, onDelete, on
                             onExport(conv.id);
                             setOpenMenuId(null);
                           }}
-                          className="w-full px-3 py-2 text-left text-xs hover:bg-gray-50 flex items-center gap-2 text-text-main"
+                          className="w-full px-3 py-2 text-left text-xs hover:bg-gray-50 flex items-center gap-2 text-text-main cursor-pointer"
                         >
                           <Download size={12} />
                           Export
@@ -181,7 +181,7 @@ export function Sidebar({ conversations, activeId, onSelect, onNew, onDelete, on
                             onDuplicate(conv.id);
                             setOpenMenuId(null);
                           }}
-                          className="w-full px-3 py-2 text-left text-xs hover:bg-gray-50 flex items-center gap-2 text-text-main"
+                          className="w-full px-3 py-2 text-left text-xs hover:bg-gray-50 flex items-center gap-2 text-text-main cursor-pointer"
                         >
                           <Copy size={12} />
                           Duplicate
@@ -192,7 +192,7 @@ export function Sidebar({ conversations, activeId, onSelect, onNew, onDelete, on
                             onDelete(conv.id);
                             setOpenMenuId(null);
                           }}
-                          className="w-full px-3 py-2 text-left text-xs hover:bg-red-50 flex items-center gap-2 text-red-500"
+                          className="w-full px-3 py-2 text-left text-xs hover:bg-red-50 flex items-center gap-2 text-red-500 cursor-pointer"
                         >
                           <Trash2 size={12} />
                           Delete

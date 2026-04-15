@@ -173,7 +173,7 @@ export const MessageItem = React.memo(function MessageItem({ message, onUpdate, 
               <div className="absolute right-0 top-full mt-1 bg-white border border-border-color shadow-lg rounded-md py-1 z-10 w-48 max-h-64 overflow-y-auto flex flex-col">
                 <button
                   onClick={() => { handleCopy(); setShowMenu(false); }}
-                  className="px-3 py-2 text-left text-xs hover:bg-bg-base flex items-center gap-2 text-text-main"
+                  className="px-3 py-2 text-left text-xs hover:bg-bg-base flex items-center gap-2 text-text-main cursor-pointer"
                 >
                   {copied ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}
                   Copy to clipboard
@@ -183,14 +183,14 @@ export const MessageItem = React.memo(function MessageItem({ message, onUpdate, 
                   <div className="px-3 py-2 flex items-center justify-between bg-red-50 text-xs">
                     <span className="text-red-600 font-bold">Delete?</span>
                     <div className="flex gap-2">
-                      <button onClick={() => { onDelete(message.id); setShowMenu(false); setShowDeleteConfirm(false); }} className="text-red-600 hover:text-red-800"><Check size={12} /></button>
-                      <button onClick={() => setShowDeleteConfirm(false)} className="text-red-600 hover:text-red-800"><X size={12} /></button>
+                      <button onClick={() => { onDelete(message.id); setShowMenu(false); setShowDeleteConfirm(false); }} className="text-red-600 hover:text-red-800 cursor-pointer"><Check size={12} /></button>
+                      <button onClick={() => setShowDeleteConfirm(false)} className="text-red-600 hover:text-red-800 cursor-pointer"><X size={12} /></button>
                     </div>
                   </div>
                 ) : (
                   <button
                     onClick={() => setShowDeleteConfirm(true)}
-                    className="px-3 py-2 text-left text-xs hover:bg-red-50 flex items-center gap-2 text-red-500"
+                    className="px-3 py-2 text-left text-xs hover:bg-red-50 flex items-center gap-2 text-red-500 cursor-pointer"
                   >
                     <Trash2 size={12} />
                     Delete
@@ -204,7 +204,7 @@ export const MessageItem = React.memo(function MessageItem({ message, onUpdate, 
                     {message.groupId && (
                       <button
                         onClick={() => { onAssignGroup(message.id, undefined); setShowMenu(false); }}
-                        className="px-3 py-2 text-left text-xs hover:bg-bg-base flex items-center gap-2 text-text-main"
+                        className="px-3 py-2 text-left text-xs hover:bg-bg-base flex items-center gap-2 text-text-main cursor-pointer"
                       >
                         <FolderMinus size={12} />
                         Remove from Group
@@ -214,7 +214,7 @@ export const MessageItem = React.memo(function MessageItem({ message, onUpdate, 
                       <button
                         key={g.id}
                         onClick={() => { onAssignGroup(message.id, g.id); setShowMenu(false); }}
-                        className="px-3 py-2 text-left text-xs hover:bg-bg-base flex items-center gap-2 text-text-main truncate"
+                        className="px-3 py-2 text-left text-xs hover:bg-bg-base flex items-center gap-2 text-text-main truncate cursor-pointer"
                       >
                         <FolderPlus size={12} className="shrink-0" />
                         <span className="truncate">Add to {g.name}</span>
@@ -236,7 +236,7 @@ export const MessageItem = React.memo(function MessageItem({ message, onUpdate, 
                 <span className="text-[11px] font-semibold uppercase tracking-wider opacity-70">Summary Version</span>
                 <button 
                   onClick={() => setIsEditingSummary(!isEditingSummary)}
-                  className="text-accent-primary hover:opacity-80"
+                  className="text-accent-primary hover:opacity-80 cursor-pointer"
                 >
                   <Edit2 size={12} />
                 </button>
@@ -286,7 +286,7 @@ export const MessageItem = React.memo(function MessageItem({ message, onUpdate, 
                     <div className="flex items-center gap-2">
                       <button 
                         onClick={(e) => { e.stopPropagation(); handleRemoveThinking(); }}
-                        className="text-text-muted hover:text-red-500"
+                        className="text-text-muted hover:text-red-500 cursor-pointer"
                         title="Remove thinking"
                       >
                         <Trash2 size={14} />
@@ -387,7 +387,7 @@ export const MessageItem = React.memo(function MessageItem({ message, onUpdate, 
           <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl flex flex-col max-h-[90vh]">
             <div className="flex items-center justify-between p-4 border-b">
               <h2 className="text-lg font-semibold text-red-600">Error Details</h2>
-              <button onClick={() => setShowErrorDetails(false)} className="p-1 hover:bg-gray-100 rounded-full">
+              <button onClick={() => setShowErrorDetails(false)} className="p-1 hover:bg-gray-100 rounded-full cursor-pointer">
                 <X size={20} />
               </button>
             </div>

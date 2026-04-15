@@ -20,7 +20,7 @@ export function SettingsModal({ settings, onSave, onClose }: SettingsModalProps)
       <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl flex flex-col max-h-[90vh]">
         <div className="flex items-center justify-between p-4 border-b">
           <h2 className="text-lg font-semibold">Settings</h2>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-full">
+          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-full cursor-pointer">
             <X size={20} />
           </button>
         </div>
