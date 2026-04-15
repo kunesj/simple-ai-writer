@@ -776,7 +776,7 @@ export function ChatArea({ conversation, settings, serverConfig, onUpdateConvers
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
               placeholder="Type a message or fiction prompt..."
-              className="w-full border border-border-color rounded-lg pl-12 pr-36 py-3 min-h-[160px] max-h-[50vh] font-inherit text-sm outline-none focus:border-accent-primary text-text-main bg-white resize-none"
+              className="w-full border border-border-color rounded-lg pl-4 pr-4 py-3 pb-14 min-h-[120px] max-h-[50vh] font-inherit text-sm outline-none focus:border-accent-primary text-text-main bg-white resize-none"
             />
             <div className="absolute right-3 bottom-3 flex gap-2">
               <button
@@ -797,7 +797,7 @@ export function ChatArea({ conversation, settings, serverConfig, onUpdateConvers
                 onClick={isGenerating ? handleStopGeneration : handleSend}
                 className={`text-white border-none px-5 py-2 rounded-md font-semibold cursor-pointer flex items-center justify-center gap-2 transition-colors text-sm ${isGenerating ? 'bg-red-500 hover:bg-red-600' : 'bg-accent-primary hover:bg-accent-primary/90'}`}
               >
-                {isGenerating ? 'Stop' : 'Run Inference'}
+                {isGenerating ? 'Stop' : 'Run'}
               </button>
             </div>
           </div>
