@@ -533,7 +533,7 @@ export function ChatArea({ conversation, settings, serverConfig, onUpdateConvers
 
   return (
     <main className="flex flex-col h-full bg-bg-base flex-1 min-w-0 min-h-0">
-      <header className="h-16 border-b border-border-color bg-white flex items-center justify-between px-8 shrink-0">
+      <header className="h-10 border-b border-border-color bg-white flex items-center justify-between px-8 shrink-0">
         <div className="flex items-center gap-3 text-sm font-medium text-text-main">
           <div className="relative">
             <button
@@ -736,7 +736,7 @@ export function ChatArea({ conversation, settings, serverConfig, onUpdateConvers
         )}
       </div>
 
-      <div className="p-6 px-8 bg-white border-t border-border-color shrink-0">
+      <div className="p-2 px-8 bg-white border-t border-border-color shrink-0">
         <div className="max-w-4xl mx-auto">
           {attachments.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-3">
@@ -776,7 +776,7 @@ export function ChatArea({ conversation, settings, serverConfig, onUpdateConvers
               </button>
             </div>
           </div>
-          <div className="flex justify-between items-center mt-3">
+          <div className="flex justify-between items-center">
             <div className="flex gap-5 items-center">
               <div className="text-[11px] text-text-muted">
                 Context: {conversation.messages.filter(m => m.inContext).length} messages (~{tokenCount.toLocaleString()} tokens)
