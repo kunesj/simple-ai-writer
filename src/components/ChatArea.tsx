@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Conversation, Message, Settings, Attachment } from '../types';
 import { MessageItem } from './MessageItem';
-import { Loader2, Trash2, MessageSquare, List, Check, X, Paperclip } from 'lucide-react';
+import { Loader2, Trash2, MessageSquare, List, Check, X, Paperclip, MoreVertical, Pencil } from 'lucide-react';
 import { generateChatStream, countTokens } from '../lib/openai';
 import { flushSave } from '../lib/storage';
 
@@ -24,6 +24,11 @@ export function ChatArea({ conversation, settings, onUpdateConversation }: ChatA
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const [groupDeleteConfirmId, setGroupDeleteConfirmId] = useState<string | null>(null);
+  const [tocMenuOpenId, setTocMenuOpenId] = useState<string | null>(null);
+  const [tocRenamingId, setTocRenamingId] = useState<string | null>(null);
+  const [tocRenameValue, setTocRenameValue] = useState('');
+  const [tocDeleteConfirmId, setTocDeleteConfirmId] = useState<string | null>(null);
+  const tocMenuRef = useRef<HTMLDivElement>(null);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -76,6 +81,18 @@ export function ChatArea({ conversation, settings, onUpdateConversation }: ChatA
     }, 1000);
     return () => clearTimeout(timer);
   }, [conversation.messages, settings]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (tocMenuRef.current && !tocMenuRef.current.contains(event.target as Node)) {
+        setTocMenuOpenId(null);
+      }
+    };
+    if (tocMenuOpenId) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [tocMenuOpenId]);
 
   const handleUpdateMessage = React.useCallback((id: string, updates: Partial<Message>) => {
     onUpdateConversation(prev => ({
@@ -543,16 +560,116 @@ export function ChatArea({ conversation, settings, onUpdateConversation }: ChatA
             </h3>
             <div className="flex flex-col gap-2 text-sm">
               {(conversation.groups || []).map(g => (
-                <button 
-                  key={`toc-${g.id}`}
-                  onClick={() => {
-                    const el = document.getElementById(`group-${g.id}`);
-                    el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }}
-                  className="text-left px-2 py-1.5 hover:bg-bg-base rounded text-text-main truncate"
-                >
-                  {g.name}
-                </button>
+                <div key={`toc-${g.id}`} className="relative group">
+                  {tocRenamingId === g.id ? (
+                    <div className="flex items-center gap-1 px-1">
+                      <input
+                        type="text"
+                        value={tocRenameValue}
+                        onChange={(e) => setTocRenameValue(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            handleRenameGroup(g.id, tocRenameValue);
+                            setTocRenamingId(null);
+                          } else if (e.key === 'Escape') {
+                            setTocRenamingId(null);
+                          }
+                        }}
+                        onBlur={() => {
+                          handleRenameGroup(g.id, tocRenameValue);
+                          setTocRenamingId(null);
+                        }}
+                        className="flex-1 px-2 py-1 text-sm border border-border-color rounded focus:border-accent-primary outline-none"
+                        autoFocus
+                      />
+                      <button
+                        onClick={() => {
+                          handleRenameGroup(g.id, tocRenameValue);
+                          setTocRenamingId(null);
+                        }}
+                        className="p-1 text-green-600 hover:bg-green-50 rounded"
+                      >
+                        <Check size={14} />
+                      </button>
+                      <button
+                        onClick={() => setTocRenamingId(null)}
+                        className="p-1 text-red-500 hover:bg-red-50 rounded"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ) : (
+                    <button 
+                      onClick={() => {
+                        const el = document.getElementById(`group-${g.id}`);
+                        el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }}
+                      className="w-full text-left px-2 py-1.5 hover:bg-bg-base rounded text-text-main truncate flex items-center justify-between cursor-pointer"
+                    >
+                      <span>{g.name}</span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setTocMenuOpenId(tocMenuOpenId === g.id ? null : g.id);
+                        }}
+                        className="p-1 text-text-muted hover:text-accent-primary opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <MoreVertical size={14} />
+                      </button>
+                    </button>
+                  )}
+                  {tocMenuOpenId === g.id && !tocRenamingId && (
+                    <div ref={tocMenuRef} className="absolute right-0 top-full mt-1 bg-white border border-border-color shadow-lg rounded-md py-1 z-10 w-32">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setTocMenuOpenId(null);
+                          setTocRenamingId(g.id);
+                          setTocRenameValue(g.name);
+                        }}
+                        className="w-full px-3 py-2 text-left text-xs hover:bg-gray-50 flex items-center gap-2 text-text-main cursor-pointer"
+                      >
+                        <Pencil size={12} />
+                        Rename
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setTocMenuOpenId(null);
+                          setTocDeleteConfirmId(g.id);
+                        }}
+                        className="w-full px-3 py-2 text-left text-xs hover:bg-red-50 flex items-center gap-2 text-red-500 cursor-pointer"
+                      >
+                        <Trash2 size={12} />
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                  {tocDeleteConfirmId === g.id && (
+                    <div className="flex items-center gap-1 bg-red-50 rounded border border-red-200 px-2 py-1 mt-1">
+                      <span className="text-[10px] text-red-600 font-bold flex-1">Delete?</span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteGroup(g.id);
+                          setTocDeleteConfirmId(null);
+                        }}
+                        className="p-1 text-red-600 hover:bg-red-100 rounded"
+                      >
+                        <Check size={12} />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setTocDeleteConfirmId(null);
+                        }}
+                        className="p-1 text-red-600 hover:bg-red-100 rounded"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           </div>
