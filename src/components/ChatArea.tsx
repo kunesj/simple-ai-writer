@@ -588,7 +588,9 @@ export function ChatArea({ conversation, settings, serverConfig, onUpdateConvers
               </>
             )}
           </div>
-          
+          <span className="text-[11px] text-text-muted ml-2">
+            Context: {conversation.messages.filter(m => m.inContext).length} messages (~{tokenCount.toLocaleString()} tokens)
+          </span>
         </div>
         <div className="flex gap-4">
           <button onClick={handleCreateGroup} className="px-2 py-1 rounded border border-border-color bg-white cursor-pointer text-[11px] hover:bg-bg-base text-text-main">
@@ -778,9 +780,6 @@ export function ChatArea({ conversation, settings, serverConfig, onUpdateConvers
           </div>
           <div className="flex justify-between items-center">
             <div className="flex gap-5 items-center">
-              <div className="text-[11px] text-text-muted">
-                Context: {conversation.messages.filter(m => m.inContext).length} messages (~{tokenCount.toLocaleString()} tokens)
-              </div>
             </div>
             <div className="flex gap-2">
               <button
