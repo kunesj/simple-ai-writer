@@ -156,7 +156,7 @@ export function ChatArea({ conversation, settings, serverConfig, onUpdateConvers
         targetModelMessageId = nextMsg.id;
         // Keep messages up to the user message, we'll replace the nextMsg
         messagesToKeep = conversation.messages.map(m => 
-          m.id === targetModelMessageId ? { ...m, content: '', thought: undefined, stats: undefined } : m
+          m.id === targetModelMessageId ? { ...m, content: '', thought: undefined, stats: undefined, error: undefined } : m
         );
       } else {
         targetModelMessageId = Date.now().toString();
