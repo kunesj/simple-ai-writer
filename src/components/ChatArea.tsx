@@ -599,7 +599,7 @@ export function ChatArea({ conversation, settings, onUpdateConversation }: ChatA
                       </button>
                     </div>
                   ) : (
-                    <button 
+                    <div 
                       onClick={() => {
                         const el = document.getElementById(`group-${g.id}`);
                         el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -616,7 +616,7 @@ export function ChatArea({ conversation, settings, onUpdateConversation }: ChatA
                       >
                         <MoreVertical size={14} />
                       </button>
-                    </button>
+                    </div>
                   )}
                   {tocMenuOpenId === g.id && !tocRenamingId && (
                     <div ref={tocMenuRef} className="absolute right-0 top-full mt-1 bg-white border border-border-color shadow-lg rounded-md py-1 z-10 w-32">
