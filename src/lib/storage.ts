@@ -1,8 +1,17 @@
-import { Conversation, Settings } from '../types';
+import { Conversation, Settings, ServerConfig } from '../types';
 
 export const defaultSettings: Settings = {
   systemInstruction: '',
+  servers: [],
+  activeServerId: null,
 };
+
+export function getEffectiveServerConfig(settings: Settings): ServerConfig | null {
+  if (settings.servers.length > 0 && settings.activeServerId) {
+    return settings.servers.find(s => s.id === settings.activeServerId) || settings.servers[0] || null;
+  }
+  return null;
+}
 
 export async function loadConversations(): Promise<Conversation[]> {
   try {

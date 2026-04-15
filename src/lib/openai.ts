@@ -1,5 +1,5 @@
 import { encode } from 'gpt-tokenizer';
-import { Message, Settings } from '../types';
+import { Message, Settings, ServerConfig } from '../types';
 
 export class ApiError extends Error {
   public requestDetails: unknown;
@@ -33,6 +33,7 @@ export async function countTokens(messages: Message[], _settings: Settings): Pro
 export async function* generateChatStream(
   messages: Message[],
   settings: Settings,
+  serverConfig: ServerConfig,
   abortSignal?: AbortSignal,
   newMessageContent?: string
 ) {
@@ -104,12 +105,12 @@ export async function* generateChatStream(
     });
   }
 
-  const baseUrl = (import.meta.env.VITE_OPENAI_BASE_URL || '').replace(/\/$/, '');
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY || '';
-  const modelName = import.meta.env.VITE_MODEL_NAME || '';
+  const baseUrl = serverConfig.baseUrl.replace(/\/$/, '');
+  const apiKey = serverConfig.apiKey;
+  const modelName = serverConfig.modelName;
 
   if (!baseUrl || !modelName) {
-    throw new Error('Missing required environment variables: VITE_OPENAI_BASE_URL and VITE_MODEL_NAME must be set');
+    throw new Error('Server configuration is incomplete. Please configure a server in Settings.');
   }
 
   const requestBody: Record<string, unknown> = {

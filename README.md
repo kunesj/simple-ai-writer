@@ -26,17 +26,17 @@ The most popular frontends are to focused on normal chatting, and the few writin
 Supports any backed with OpenAI-compatible API.
 
 ### Google Gemini API
-```env
-VITE_OPENAI_BASE_URL="https://generativelanguage.googleapis.com/v1beta/openai/"
-VITE_OPENAI_API_KEY="your-api-key"
-VITE_MODEL_NAME="gemini-3.1-flash-lite-preview"
+```
+Base URL: https://generativelanguage.googleapis.com/v1beta/openai/
+Model Name: gemini-3.1-flash-lite-preview
+API Key: your-api-key
 ```
 
 ### Local llama.cpp
-```env
-VITE_OPENAI_BASE_URL="http://localhost:8080/v1"
-VITE_OPENAI_API_KEY="your-api-key"
-VITE_MODEL_NAME="your-model-name"
+```
+Base URL: http://localhost:8080/v1
+Model Name: your-model-name
+API Key: your-api-key
 ```
 
 ## Getting Started
@@ -54,18 +54,14 @@ VITE_MODEL_NAME="your-model-name"
    npm install
    ```
 
-2. Configure environment:
-   ```bash
-   cp .env.example .env
-   # Edit .env with your API settings
-   ```
-
-3. Start the development server:
+2. Start the development server:
    ```bash
    npm run dev
    ```
 
-4. Open `http://localhost:3000`.
+3. Open `http://localhost:3000`.
+
+4. Configure server in settings
 
 ### Production Build
 

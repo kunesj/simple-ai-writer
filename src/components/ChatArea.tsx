@@ -1,17 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Conversation, Message, Settings, Attachment } from '../types';
+import { Conversation, Message, Settings, Attachment, ServerConfig } from '../types';
 import { MessageItem } from './MessageItem';
-import { Loader2, Trash2, MessageSquare, List, Check, X, Paperclip, MoreVertical, Pencil } from 'lucide-react';
+import { Loader2, Trash2, MessageSquare, List, Check, X, Paperclip, MoreVertical, Pencil, ChevronDown } from 'lucide-react';
 import { generateChatStream, countTokens } from '../lib/openai';
-import { flushSave } from '../lib/storage';
+import { flushSave, getEffectiveServerConfig } from '../lib/storage';
 
 interface ChatAreaProps {
   conversation: Conversation;
   settings: Settings;
+  serverConfig: ServerConfig | null;
   onUpdateConversation: (updates: Partial<Conversation> | ((prev: Conversation) => Partial<Conversation>)) => void;
+  onOpenSettings: () => void;
+  onChangeActiveServer: (serverId: string) => void;
 }
 
-export function ChatArea({ conversation, settings, onUpdateConversation }: ChatAreaProps) {
+export function ChatArea({ conversation, settings, serverConfig, onUpdateConversation, onOpenSettings, onChangeActiveServer }: ChatAreaProps) {
   const [input, setInput] = useState('');
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -192,7 +195,10 @@ export function ChatArea({ conversation, settings, onUpdateConversation }: ChatA
       const targetIndex = messagesToKeep.findIndex(m => m.id === targetModelMessageId);
       const contextMessages = messagesToKeep.slice(0, targetIndex);
       
-      const stream = generateChatStream(contextMessages, settings, abortControllerRef.current.signal);
+      if (!serverConfig) {
+        throw new Error('No server configured. Please add a server in Settings.');
+      }
+      const stream = generateChatStream(contextMessages, settings, serverConfig, abortControllerRef.current.signal);
       
       let currentContent = '';
       let currentThought = '';
@@ -251,7 +257,7 @@ export function ChatArea({ conversation, settings, onUpdateConversation }: ChatA
       abortControllerRef.current = null;
       flushSave(conversation.id);
     }
-  }, [conversation.id, conversation.messages, isGenerating, onUpdateConversation, settings]);
+  }, [conversation.id, conversation.messages, isGenerating, onUpdateConversation, settings, serverConfig]);
 
   const handleSend = React.useCallback(async () => {
     if (isGenerating) return;
@@ -302,7 +308,10 @@ export function ChatArea({ conversation, settings, onUpdateConversation }: ChatA
         }]
       }));
 
-      const stream = generateChatStream(newMessages, settings, abortControllerRef.current.signal);
+      if (!serverConfig) {
+        throw new Error('No server configured. Please add a server in Settings.');
+      }
+      const stream = generateChatStream(newMessages, settings, serverConfig, abortControllerRef.current.signal);
       
       for await (const chunk of stream) {
         if (chunk.type === 'content') {
@@ -357,7 +366,7 @@ export function ChatArea({ conversation, settings, onUpdateConversation }: ChatA
       abortControllerRef.current = null;
       flushSave(conversation.id);
     }
-  }, [conversation.id, conversation.messages, conversation.title, input, attachments, isGenerating, onUpdateConversation, settings]);
+  }, [conversation.id, conversation.messages, conversation.title, input, attachments, isGenerating, onUpdateConversation, settings, serverConfig]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -519,13 +528,66 @@ export function ChatArea({ conversation, settings, onUpdateConversation }: ChatA
     return rendered;
   };
 
-  const modelName = import.meta.env.VITE_MODEL_NAME;
+  const [serverDropdownOpen, setServerDropdownOpen] = useState(false);
+  const effectiveServerConfig = serverConfig || getEffectiveServerConfig(settings);
 
   return (
     <main className="flex flex-col h-full bg-bg-base flex-1 min-w-0 min-h-0">
       <header className="h-16 border-b border-border-color bg-white flex items-center justify-between px-8 shrink-0">
         <div className="flex items-center gap-3 text-sm font-medium text-text-main">
-          <span className="font-bold">{modelName}</span>
+          <div className="relative">
+            <button
+              onClick={() => setServerDropdownOpen(!serverDropdownOpen)}
+              className="flex items-center gap-2 font-bold hover:bg-gray-100 px-2 py-1 rounded cursor-pointer"
+            >
+              <span>{effectiveServerConfig?.modelName || 'No Server'}</span>
+              <ChevronDown size={14} />
+            </button>
+            {serverDropdownOpen && (
+              <>
+                <div 
+                  className="fixed inset-0 z-10" 
+                  onClick={() => setServerDropdownOpen(false)}
+                />
+                <div className="absolute top-full left-0 mt-1 bg-white border border-border-color shadow-lg rounded-lg py-1 z-20 min-w-[200px]">
+                  {settings.servers.map(server => (
+                    <button
+                      key={server.id}
+                      onClick={() => {
+                        setServerDropdownOpen(false);
+                        onChangeActiveServer(server.id);
+                      }}
+                      className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center justify-between cursor-pointer ${settings.activeServerId === server.id ? 'bg-blue-50' : ''}`}
+                    >
+                      <div>
+                        <div className="font-medium">{server.name || 'Unnamed'}</div>
+                        <div className="text-xs text-gray-500">{server.modelName}</div>
+                      </div>
+                      {settings.activeServerId === server.id && (
+                        <Check size={14} className="text-blue-600" />
+                      )}
+                    </button>
+                  ))}
+                  {settings.servers.length === 0 && (
+                    <div className="px-3 py-2 text-sm text-gray-500">
+                      No servers configured
+                    </div>
+                  )}
+                  <div className="border-t mt-1 pt-1">
+                    <button
+                      onClick={() => {
+                        setServerDropdownOpen(false);
+                        onOpenSettings();
+                      }}
+                      className="w-full px-3 py-2 text-left text-sm text-blue-600 hover:bg-blue-50 cursor-pointer"
+                    >
+                      Configure Servers...
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
           <span className="text-[11px] text-text-muted ml-2">
             ~{tokenCount.toLocaleString()} tokens in context
           </span>

@@ -120,6 +120,8 @@ function convertGoogleAIExport(data: GoogleAIExport): { conversation: Conversati
     temperature: data.runSettings?.temperature,
     topP: data.runSettings?.topP,
     topK: data.runSettings?.topK,
+    servers: [],
+    activeServerId: null,
   };
 
   const chunks = data.chunkedPrompt?.chunks || [];
@@ -382,7 +384,14 @@ export default function App() {
         <ChatArea 
           conversation={activeConversation}
           settings={settings}
+          serverConfig={(settings.servers || []).find(s => s.id === settings.activeServerId) || null}
           onUpdateConversation={handleUpdateConversation}
+          onOpenSettings={() => setIsSettingsOpen(true)}
+          onChangeActiveServer={(serverId) => {
+            const newSettings = { ...settings, activeServerId: serverId };
+            setSettings(newSettings);
+            saveSettings(newSettings);
+          }}
         />
       ) : (
         <main className="flex flex-col h-full bg-bg-base flex-1 items-center justify-center">
@@ -429,4 +438,3 @@ export default function App() {
     </div>
   );
 }
-

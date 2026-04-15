@@ -49,9 +49,19 @@ export interface Conversation {
   updatedAt: number;
 }
 
+export interface ServerConfig {
+  id: string;
+  name: string;
+  baseUrl: string;
+  apiKey: string;
+  modelName: string;
+}
+
 export interface Settings {
   systemInstruction: string;
   temperature?: number;
   topK?: number;
   topP?: number;
+  servers: ServerConfig[];
+  activeServerId: string | null;
 }
