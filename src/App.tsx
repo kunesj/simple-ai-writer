@@ -4,11 +4,93 @@
  */
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Conversation, Settings } from './types';
+import { Conversation, Settings, Message, Attachment } from './types';
 import { loadConversations, saveConversation, deleteConversation, loadSettings, saveSettings, defaultSettings, isSaveInProgress } from './lib/storage';
 import { Sidebar } from './components/Sidebar';
 import { ChatArea } from './components/ChatArea';
 import { SettingsModal } from './components/SettingsModal';
+
+interface LlamaCppExtra {
+  type: string;
+  name: string;
+  content: string;
+}
+
+interface LlamaCppMessage {
+  id: string;
+  convId: string;
+  type: string;
+  timestamp: number;
+  role: string;
+  content: string;
+  toolCalls: string;
+  children: string[];
+  extra: LlamaCppExtra[];
+  parent: string;
+  model?: string;
+  reasoningContent?: string;
+  timings?: Record<string, unknown>;
+}
+
+interface LlamaCppExport {
+  conv: {
+    id: string;
+    name: string;
+    lastModified: number;
+    currNode: string;
+  };
+  messages: LlamaCppMessage[];
+}
+
+function convertLlamaCppExport(data: LlamaCppExport): Conversation {
+  const messages: Message[] = data.messages.map((msg) => {
+    const message: Message = {
+      id: msg.id,
+      role: msg.role === 'assistant' ? 'model' : msg.role === 'user' ? 'user' : 'system',
+      content: msg.content,
+      useSummary: false,
+      inContext: true,
+      isCollapsed: false,
+      timestamp: msg.timestamp,
+    };
+
+    if (msg.reasoningContent) {
+      message.thought = msg.reasoningContent;
+    }
+
+    if (msg.timings) {
+      message.stats = {
+        completionTokensPerSecond: msg.timings.predicted_per_second as number | undefined,
+        promptTokensPerSecond: msg.timings.prompt_per_second as number | undefined,
+      };
+    }
+
+    if (msg.extra && msg.extra.length > 0) {
+      const attachments: Attachment[] = msg.extra
+        .filter((e) => e.type === 'TEXT')
+        .map((e) => ({
+          id: `${msg.id}-${e.name}`,
+          url: `data:text/plain;charset=utf-8,${encodeURIComponent(e.content)}`,
+          name: e.name,
+          type: 'text/plain',
+          size: e.content.length,
+        }));
+      if (attachments.length > 0) {
+        message.attachments = attachments;
+      }
+    }
+
+    return message;
+  });
+
+  return {
+    id: data.conv.id,
+    title: data.conv.name || '',
+    messages,
+    groups: [],
+    updatedAt: data.conv.lastModified,
+  };
+}
 
 export default function App() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -126,24 +208,41 @@ export default function App() {
     reader.onload = (e) => {
       try {
         const content = e.target?.result as string;
-        const importedConv = JSON.parse(content) as Conversation;
+        const parsed = JSON.parse(content);
         
-        // Basic validation
-        if (importedConv && importedConv.messages && Array.isArray(importedConv.messages)) {
-          const newConv: Conversation = {
-            ...importedConv,
-            id: Date.now().toString(), // Always assign a new ID to avoid collisions
-            updatedAt: Date.now(),
-          };
-          setConversations(prev => {
-            const next = [newConv, ...prev];
-            saveConversation(newConv);
-            return next;
-          });
-          setActiveId(newConv.id);
+        let newConv: Conversation;
+        
+        // Detect llama.cpp export format
+        if (parsed.conv && parsed.messages && Array.isArray(parsed.messages)) {
+          newConv = convertLlamaCppExport(parsed as LlamaCppExport);
         } else {
-          setErrorMessage('Invalid conversation file format.');
+          // Try our own format
+          const importedConv = parsed as Conversation;
+          if (importedConv && importedConv.messages && Array.isArray(importedConv.messages)) {
+            newConv = {
+              ...importedConv,
+              id: Date.now().toString(),
+              updatedAt: Date.now(),
+            };
+          } else {
+            setErrorMessage('Invalid conversation file format.');
+            return;
+          }
         }
+        
+        // Always assign a new ID to avoid collisions
+        newConv = {
+          ...newConv,
+          id: Date.now().toString(),
+          updatedAt: Date.now(),
+        };
+        
+        setConversations(prev => {
+          const next = [newConv, ...prev];
+          saveConversation(newConv);
+          return next;
+        });
+        setActiveId(newConv.id);
       } catch (error) {
         console.error('Failed to parse JSON:', error);
         setErrorMessage('Failed to parse conversation file.');
