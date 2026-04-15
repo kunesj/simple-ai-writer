@@ -195,6 +195,13 @@ export async function* generateChatStream(
                   thought: false
                 };
               }
+              else if (delta && delta.reasoning_content) {
+                yield {
+                  type: 'content',
+                  text: delta.reasoning_content,
+                  thought: true
+                };
+              }
             }
             
             if (data.usage) {
