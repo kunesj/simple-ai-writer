@@ -607,14 +607,14 @@ export function ChatArea({ conversation, settings, onUpdateConversation }: ChatA
               <button
                 onClick={() => handleAddMessage('user')}
                 disabled={!input.trim() || isGenerating}
-                className="px-3 py-2 rounded border border-border-color bg-white text-text-main text-xs hover:bg-bg-base disabled:opacity-50"
+                className="px-3 py-2 rounded border border-border-color bg-white text-text-main text-xs hover:bg-bg-base disabled:opacity-50 cursor-pointer"
               >
                 Add User
               </button>
               <button
                 onClick={() => handleAddMessage('model')}
                 disabled={!input.trim() || isGenerating}
-                className="px-3 py-2 rounded border border-border-color bg-white text-text-main text-xs hover:bg-bg-base disabled:opacity-50"
+                className="px-3 py-2 rounded border border-border-color bg-white text-text-main text-xs hover:bg-bg-base disabled:opacity-50 cursor-pointer"
               >
                 Add Model
               </button>

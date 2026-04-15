@@ -85,14 +85,14 @@ export function Sidebar({ conversations, activeId, onSelect, onNew, onDelete, on
         <div className="flex gap-2 mb-4">
           <button 
             onClick={onNew}
-            className="flex-1 flex items-center justify-center gap-2 bg-accent-primary text-white py-2 px-4 rounded-md hover:bg-accent-primary/90 transition-colors font-semibold text-sm"
+            className="flex-1 flex items-center justify-center gap-2 bg-accent-primary text-white py-2 px-4 rounded-md hover:bg-accent-primary/90 transition-colors font-semibold text-sm cursor-pointer"
           >
             <Plus size={16} />
             New
           </button>
           <button 
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center justify-center gap-2 bg-white border border-border-color text-text-main py-2 px-4 rounded-md hover:bg-bg-base transition-colors font-semibold text-sm"
+            className="flex items-center justify-center gap-2 bg-white border border-border-color text-text-main py-2 px-4 rounded-md hover:bg-bg-base transition-colors font-semibold text-sm cursor-pointer"
             title="Import Conversation"
           >
             <Upload size={16} />
