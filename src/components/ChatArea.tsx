@@ -383,9 +383,31 @@ export function ChatArea({ conversation, settings, serverConfig, onUpdateConvers
   }, [conversation.id, conversation.messages, conversation.title, input, attachments, isGenerating, onUpdateConversation, settings, serverConfig]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
+    if (e.key === 'Enter') {
+      if (e.ctrlKey) {
+        e.preventDefault();
+        handleSend();
+      } else if (e.altKey) {
+        e.preventDefault();
+        handleAppendToPrompt();
+      }
+    }
+  };
+
+  const handleAppendToPrompt = () => {
+    if (!input.trim()) return;
+    const lastMsg = conversation.messages[conversation.messages.length - 1];
+    const lastUserIdx = conversation.messages.map(m => m.role).lastIndexOf('user');
+    if (lastUserIdx !== -1 && lastMsg && lastMsg.role === 'user') {
+      const updated = [...conversation.messages];
+      updated[lastUserIdx] = {
+        ...updated[lastUserIdx],
+        content: updated[lastUserIdx].content + '\n\n' + input.trim(),
+      };
+      onUpdateConversation({ messages: updated });
+      setInput('');
+    } else {
+      handleAddMessage('user');
     }
   };
 
@@ -795,6 +817,7 @@ export function ChatArea({ conversation, settings, serverConfig, onUpdateConvers
               </button>
               <button
                 onClick={isGenerating ? handleStopGeneration : handleSend}
+                title="Send Prompt: Ctrl+Enter | Append to Prompt: Alt+Enter | New Line: Enter"
                 className={`text-white border-none px-5 py-2 rounded-md font-semibold cursor-pointer flex items-center justify-center gap-2 transition-colors text-sm ${isGenerating ? 'bg-red-500 hover:bg-red-600' : 'bg-accent-primary hover:bg-accent-primary/90'}`}
               >
                 {isGenerating ? 'Stop' : 'Run'}
