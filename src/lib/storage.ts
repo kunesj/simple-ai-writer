@@ -20,7 +20,49 @@ export async function loadConversations(): Promise<Conversation[]> {
   return [];
 }
 
-export async function saveConversation(conversation: Conversation): Promise<void> {
+const saveTimeouts = new Map<string, ReturnType<typeof setTimeout>>();
+const pendingSaves = new Map<string, Conversation>();
+const DEBOUNCE_MS = 500;
+
+export function saveConversation(conversation: Conversation): void {
+  pendingSaves.set(conversation.id, conversation);
+  
+  if (saveTimeouts.has(conversation.id)) {
+    return;
+  }
+  
+  const timeout = setTimeout(() => {
+    saveTimeouts.delete(conversation.id);
+    const pending = pendingSaves.get(conversation.id);
+    if (pending) {
+      pendingSaves.delete(conversation.id);
+      doSaveConversation(pending);
+    }
+  }, DEBOUNCE_MS);
+  
+  saveTimeouts.set(conversation.id, timeout);
+}
+
+export function flushSave(conversationId: string): void {
+  const timeout = saveTimeouts.get(conversationId);
+  if (timeout) {
+    clearTimeout(timeout);
+    saveTimeouts.delete(conversationId);
+  }
+  const pending = pendingSaves.get(conversationId);
+  if (pending) {
+    pendingSaves.delete(conversationId);
+    doSaveConversation(pending);
+  }
+}
+
+export function flushAllSaves(): void {
+  for (const id of saveTimeouts.keys()) {
+    flushSave(id);
+  }
+}
+
+async function doSaveConversation(conversation: Conversation): Promise<void> {
   try {
     await fetch(`/api/conversations/${conversation.id}`, {
       method: 'POST',

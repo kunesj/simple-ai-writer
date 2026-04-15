@@ -3,6 +3,7 @@ import { Conversation, Message, Settings, Attachment } from '../types';
 import { MessageItem } from './MessageItem';
 import { Loader2, Trash2, MessageSquare, List, Check, X, Paperclip } from 'lucide-react';
 import { generateChatStream, countTokens } from '../lib/openai';
+import { flushSave } from '../lib/storage';
 
 interface ChatAreaProps {
   conversation: Conversation;
@@ -114,6 +115,7 @@ export function ChatArea({ conversation, settings, onUpdateConversation }: ChatA
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
+      flushSave(conversation.id);
     }
   };
 
@@ -229,8 +231,9 @@ export function ChatArea({ conversation, settings, onUpdateConversation }: ChatA
       setIsGenerating(false);
       setGeneratingMessageId(null);
       abortControllerRef.current = null;
+      flushSave(conversation.id);
     }
-  }, [conversation.messages, isGenerating, onUpdateConversation, settings]);
+  }, [conversation.id, conversation.messages, isGenerating, onUpdateConversation, settings]);
 
   const handleSend = React.useCallback(async () => {
     if (isGenerating) return;
@@ -333,8 +336,9 @@ export function ChatArea({ conversation, settings, onUpdateConversation }: ChatA
       setIsGenerating(false);
       setGeneratingMessageId(null);
       abortControllerRef.current = null;
+      flushSave(conversation.id);
     }
-  }, [conversation.messages, conversation.title, input, attachments, isGenerating, onUpdateConversation, settings]);
+  }, [conversation.id, conversation.messages, conversation.title, input, attachments, isGenerating, onUpdateConversation, settings]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
