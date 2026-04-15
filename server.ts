@@ -28,6 +28,44 @@ async function safeWriteFile(filePath: string, data: string) {
   await fs.rename(tempPath, filePath);
 }
 
+const pendingWrites = new Map<string, Promise<void>>();
+const inProgressData = new Map<string, string>();
+
+async function safeWriteFileWithDedupe(filePath: string, data: string): Promise<void> {
+  const existingData = inProgressData.get(filePath);
+  if (existingData === data) {
+    return;
+  }
+  
+  if (pendingWrites.has(filePath)) {
+    await pendingWrites.get(filePath);
+    if (inProgressData.get(filePath) === data) {
+      return;
+    }
+  }
+  
+  const writePromise = (async () => {
+    inProgressData.set(filePath, data);
+    try {
+      await safeWriteFile(filePath, data);
+      lastWriteTime.set(filePath, Date.now());
+    } finally {
+      pendingWrites.delete(filePath);
+    }
+  })();
+  
+  pendingWrites.set(filePath, writePromise);
+  await writePromise;
+}
+
+const lastWriteTime = new Map<string, number>();
+const WATCHER_IGNORE_WINDOW_MS = 200;
+
+function isRecentWrite(filePath: string): boolean {
+  const lastWrite = lastWriteTime.get(filePath);
+  return lastWrite !== undefined && (Date.now() - lastWrite) < WATCHER_IGNORE_WINDOW_MS;
+}
+
 async function startServer() {
   await ensureDataDir();
 
@@ -78,7 +116,8 @@ async function startServer() {
 
   app.post("/api/settings", async (req, res) => {
     try {
-      await safeWriteFile(SETTINGS_FILE, JSON.stringify(req.body, null, 2));
+      const data = JSON.stringify(req.body, null, 2);
+      await safeWriteFileWithDedupe(SETTINGS_FILE, data);
       res.json({ success: true });
     } catch (e) {
       res.status(500).json({ error: "Failed to save settings" });
@@ -105,9 +144,11 @@ async function startServer() {
   app.post("/api/conversations/:id", async (req, res) => {
     try {
       const filePath = path.join(CONVERSATIONS_DIR, `${req.params.id}.json`);
-      await safeWriteFile(filePath, JSON.stringify(req.body, null, 2));
+      const data = JSON.stringify(req.body, null, 2);
+      await safeWriteFileWithDedupe(filePath, data);
       res.json({ success: true });
-    } catch (e) {
+    } catch (e: any) {
+      console.error("Failed to save conversation:", e);
       res.status(500).json({ error: "Failed to save conversation" });
     }
   });
@@ -145,6 +186,10 @@ async function startServer() {
       try {
         const watcher = fs.watch(DATA_DIR, { recursive: true, signal: ac.signal });
         for await (const event of watcher) {
+          if (isRecentWrite(path.join(DATA_DIR, event.filename || ''))) {
+            continue;
+          }
+          
           if (event.filename === 'settings.json') {
             if (settingsTimeout) clearTimeout(settingsTimeout);
             settingsTimeout = setTimeout(() => {
