@@ -387,7 +387,7 @@ export default function App() {
       ) : (
         <main className="flex flex-col h-full bg-bg-base flex-1 items-center justify-center">
           <div className="text-center">
-            <h2 className="text-2xl font-semibold text-text-main mb-2">Google AI Studio Offline</h2>
+            <h2 className="text-2xl font-semibold text-text-main mb-2">Simple AI Writer</h2>
             <p className="text-text-muted mb-4">Create a new chat to get started.</p>
             <button 
               onClick={handleNewConversation}

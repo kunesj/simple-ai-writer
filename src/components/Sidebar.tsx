@@ -78,7 +78,7 @@ export function Sidebar({ conversations, activeId, onSelect, onNew, onDelete, on
     <aside className="bg-bg-sidebar border-r border-border-color flex flex-col h-full w-[280px] shrink-0">
       <div className="p-6 border-b border-border-color font-bold text-sm tracking-[1px] uppercase flex items-center gap-2.5">
         <div className="w-3 h-3 bg-accent-primary rounded-[3px]"></div>
-        AI Studio Offline
+        Simple AI Writer
       </div>
       
       <div className="flex-1 p-4 overflow-y-auto">
