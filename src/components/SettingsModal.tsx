@@ -50,7 +50,6 @@ export function SettingsModal({ settings, onSave, onClose }: SettingsModalProps)
             <div className="flex flex-col gap-2">
               <label className="font-medium text-sm text-gray-700">
                 <span>Temperature</span>
-                <span className="text-gray-500 font-normal ml-2">(0-2, empty = default)</span>
               </label>
               <input 
                 type="number" 
@@ -59,12 +58,12 @@ export function SettingsModal({ settings, onSave, onClose }: SettingsModalProps)
                 onChange={(e) => handleChange('temperature', parseNumber(e.target.value))}
                 className="border rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="default"
+                title="0-2, empty = use model default"
               />
             </div>
             <div className="flex flex-col gap-2">
               <label className="font-medium text-sm text-gray-700">
                 <span>Top K</span>
-                <span className="text-gray-500 font-normal ml-2">(1-100, empty = default)</span>
               </label>
               <input 
                 type="number" 
@@ -73,12 +72,12 @@ export function SettingsModal({ settings, onSave, onClose }: SettingsModalProps)
                 onChange={(e) => handleChange('topK', parseNumber(e.target.value))}
                 className="border rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="default"
+                title="1-100, empty = use model default"
               />
             </div>
             <div className="flex flex-col gap-2">
               <label className="font-medium text-sm text-gray-700">
                 <span>Top P</span>
-                <span className="text-gray-500 font-normal ml-2">(0-1, empty = default)</span>
               </label>
               <input 
                 type="number" 
@@ -87,6 +86,7 @@ export function SettingsModal({ settings, onSave, onClose }: SettingsModalProps)
                 onChange={(e) => handleChange('topP', parseNumber(e.target.value))}
                 className="border rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="default"
+                title="0-1, empty = use model default"
               />
             </div>
           </div>
