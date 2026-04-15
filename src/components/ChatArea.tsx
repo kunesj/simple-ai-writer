@@ -193,6 +193,8 @@ export function ChatArea({ conversation, settings, onUpdateConversation }: ChatA
             totalTokens: chunk.usage.totalTokenCount,
             promptTokens: chunk.usage.promptTokenCount,
             completionTokens: chunk.usage.completionTokenCount,
+            promptTokensPerSecond: chunk.usage.promptTokensPerSecond,
+            completionTokensPerSecond: chunk.usage.completionTokensPerSecond,
           };
         }
         
@@ -297,6 +299,8 @@ export function ChatArea({ conversation, settings, onUpdateConversation }: ChatA
             totalTokens: chunk.usage.totalTokenCount,
             promptTokens: chunk.usage.promptTokenCount,
             completionTokens: chunk.usage.completionTokenCount,
+            promptTokensPerSecond: chunk.usage.promptTokensPerSecond,
+            completionTokensPerSecond: chunk.usage.completionTokensPerSecond,
           };
         }
         

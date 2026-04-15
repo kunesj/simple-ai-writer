@@ -211,6 +211,8 @@ export async function* generateChatStream(
                   completionTokenCount: data.usage.completion_tokens,
                   promptTokenCount: data.usage.prompt_tokens,
                   totalTokenCount: data.usage.total_tokens,
+                  promptTokensPerSecond: data.timings?.prompt_per_second,
+                  completionTokensPerSecond: data.timings?.predicted_per_second,
                 }
               };
             }

@@ -24,6 +24,8 @@ export interface Message {
     totalTokens?: number;
     promptTokens?: number;
     completionTokens?: number;
+    promptTokensPerSecond?: number;
+    completionTokensPerSecond?: number;
   };
   error?: {
     message: string;

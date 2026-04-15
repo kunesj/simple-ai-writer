@@ -374,6 +374,7 @@ export const MessageItem = React.memo(function MessageItem({ message, onUpdate, 
                   {message.stats.promptTokens !== undefined && <span>Prompt: {message.stats.promptTokens}</span>}
                   {message.stats.completionTokens !== undefined && <span>Response: {message.stats.completionTokens}</span>}
                   {message.stats.totalTokens !== undefined && <span>Total: {message.stats.totalTokens}</span>}
+                  {message.stats.completionTokensPerSecond !== undefined && <span>{message.stats.completionTokensPerSecond.toFixed(1)} tok/s</span>}
                 </div>
               )}
             </div>
