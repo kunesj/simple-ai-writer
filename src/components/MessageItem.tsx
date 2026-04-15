@@ -372,8 +372,7 @@ export const MessageItem = React.memo(function MessageItem({ message, onUpdate, 
               {message.stats && (
                 <div className="mt-4 pt-2 border-t border-border-color text-[10px] text-text-disabled flex gap-3">
                   {message.stats.promptTokens !== undefined && <span>Prompt: {message.stats.promptTokens}</span>}
-                  {message.stats.candidatesTokens !== undefined && <span>Response: {message.stats.candidatesTokens}</span>}
-                  {message.stats.thoughtsTokens !== undefined && <span>Thoughts: {message.stats.thoughtsTokens}</span>}
+                  {message.stats.completionTokens !== undefined && <span>Response: {message.stats.completionTokens}</span>}
                   {message.stats.totalTokens !== undefined && <span>Total: {message.stats.totalTokens}</span>}
                 </div>
               )}

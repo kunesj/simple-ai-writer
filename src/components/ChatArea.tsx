@@ -192,8 +192,7 @@ export function ChatArea({ conversation, settings, onUpdateConversation }: ChatA
           currentStats = {
             totalTokens: chunk.usage.totalTokenCount,
             promptTokens: chunk.usage.promptTokenCount,
-            candidatesTokens: chunk.usage.candidatesTokenCount,
-            thoughtsTokens: chunk.usage.thoughtsTokenCount,
+            completionTokens: chunk.usage.completionTokenCount,
           };
         }
         
@@ -297,8 +296,7 @@ export function ChatArea({ conversation, settings, onUpdateConversation }: ChatA
           currentStats = {
             totalTokens: chunk.usage.totalTokenCount,
             promptTokens: chunk.usage.promptTokenCount,
-            candidatesTokens: chunk.usage.candidatesTokenCount,
-            thoughtsTokens: chunk.usage.thoughtsTokenCount,
+            completionTokens: chunk.usage.completionTokenCount,
           };
         }
         

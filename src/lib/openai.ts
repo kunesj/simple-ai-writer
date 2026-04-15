@@ -208,10 +208,9 @@ export async function* generateChatStream(
               yield {
                 type: 'usage',
                 usage: {
-                  totalTokenCount: data.usage.total_tokens,
+                  completionTokenCount: data.usage.completion_tokens,
                   promptTokenCount: data.usage.prompt_tokens,
-                  candidatesTokenCount: data.usage.completion_tokens,
-                  thoughtsTokenCount: 0
+                  totalTokenCount: data.usage.total_tokens,
                 }
               };
             }

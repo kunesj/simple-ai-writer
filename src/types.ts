@@ -23,8 +23,7 @@ export interface Message {
   stats?: {
     totalTokens?: number;
     promptTokens?: number;
-    candidatesTokens?: number;
-    thoughtsTokens?: number;
+    completionTokens?: number;
   };
   error?: {
     message: string;
