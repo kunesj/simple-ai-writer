@@ -23,6 +23,7 @@ export async function loadConversations(): Promise<Conversation[]> {
 const saveTimeouts = new Map<string, ReturnType<typeof setTimeout>>();
 const pendingSaves = new Map<string, Conversation>();
 const DEBOUNCE_MS = 500;
+const saveInProgress = new Set<string>();
 
 export function saveConversation(conversation: Conversation): void {
   pendingSaves.set(conversation.id, conversation);
@@ -36,7 +37,10 @@ export function saveConversation(conversation: Conversation): void {
     const pending = pendingSaves.get(conversation.id);
     if (pending) {
       pendingSaves.delete(conversation.id);
-      doSaveConversation(pending);
+      saveInProgress.add(pending.id);
+      doSaveConversation(pending).finally(() => {
+        setTimeout(() => saveInProgress.delete(pending.id), 100);
+      });
     }
   }, DEBOUNCE_MS);
   
@@ -52,7 +56,10 @@ export function flushSave(conversationId: string): void {
   const pending = pendingSaves.get(conversationId);
   if (pending) {
     pendingSaves.delete(conversationId);
-    doSaveConversation(pending);
+    saveInProgress.add(pending.id);
+    doSaveConversation(pending).finally(() => {
+      setTimeout(() => saveInProgress.delete(pending.id), 100);
+    });
   }
 }
 
@@ -60,6 +67,10 @@ export function flushAllSaves(): void {
   for (const id of saveTimeouts.keys()) {
     flushSave(id);
   }
+}
+
+export function isSaveInProgress(conversationId: string): boolean {
+  return saveInProgress.has(conversationId);
 }
 
 async function doSaveConversation(conversation: Conversation): Promise<void> {

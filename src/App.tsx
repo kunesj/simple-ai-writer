@@ -5,7 +5,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Conversation, Settings } from './types';
-import { loadConversations, saveConversation, deleteConversation, loadSettings, saveSettings, defaultSettings } from './lib/storage';
+import { loadConversations, saveConversation, deleteConversation, loadSettings, saveSettings, defaultSettings, isSaveInProgress } from './lib/storage';
 import { Sidebar } from './components/Sidebar';
 import { ChatArea } from './components/ChatArea';
 import { SettingsModal } from './components/SettingsModal';
@@ -34,13 +34,14 @@ export default function App() {
     const eventSource = new EventSource('/api/events');
     
     eventSource.addEventListener('settings_changed', async () => {
-      console.warn('Settings changed on disk, reloading...');
       const loadedSettings = await loadSettings();
       setSettings(loadedSettings);
     });
 
     eventSource.addEventListener('conversations_changed', async () => {
-      console.warn('Conversations changed on disk, reloading...');
+      if (activeId && isSaveInProgress(activeId)) {
+        return;
+      }
       const loadedConvs = await loadConversations();
       setConversations(loadedConvs);
     });
@@ -48,7 +49,7 @@ export default function App() {
     return () => {
       eventSource.close();
     };
-  }, []);
+  }, [activeId]);
 
   const handleNewConversation = () => {
     const newConv: Conversation = {
