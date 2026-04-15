@@ -411,17 +411,6 @@ export function ChatArea({ conversation, settings, serverConfig, onUpdateConvers
     }
   };
 
-  const handleCreateGroup = () => {
-    const groupId = Date.now().toString();
-    const newGroup = {
-      id: groupId,
-      name: 'NEW GROUP',
-      isCollapsed: false,
-      messageIds: []
-    };
-    onUpdateConversation({ groups: [...(conversation.groups || []), newGroup] });
-  };
-
   const handleToggleGroup = (groupId: string) => {
     const newGroups = (conversation.groups || []).map(g => 
       g.id === groupId ? { ...g, isCollapsed: !g.isCollapsed } : g
@@ -447,6 +436,19 @@ export function ChatArea({ conversation, settings, serverConfig, onUpdateConvers
   const handleAssignToGroup = React.useCallback((messageId: string, groupId: string | undefined) => {
     onUpdateConversation(prev => ({
       messages: prev.messages.map(m => m.id === messageId ? { ...m, groupId } : m)
+    }));
+  }, [onUpdateConversation]);
+
+  const handleCreateNewGroup = React.useCallback((messageId: string) => {
+    const newGroup = {
+      id: Date.now().toString(),
+      name: 'New Group',
+      isCollapsed: false,
+      messageIds: [messageId],
+    };
+    onUpdateConversation(prev => ({
+      groups: [...(prev.groups || []), newGroup],
+      messages: prev.messages.map(m => m.id === messageId ? { ...m, groupId: newGroup.id } : m)
     }));
   }, [onUpdateConversation]);
 
@@ -532,8 +534,9 @@ export function ChatArea({ conversation, settings, serverConfig, onUpdateConvers
                       onDelete={handleDeleteMessage} 
                       onRegenerate={handleRegenerate}
                       isGenerating={isGenerating && generatingMessageId === msg.id}
-                      groups={groups}
+groups={groups}
                       onAssignGroup={handleAssignToGroup}
+                      onCreateNewGroup={handleCreateNewGroup}
                     />
                   </div>
                 ))}
@@ -554,6 +557,7 @@ export function ChatArea({ conversation, settings, serverConfig, onUpdateConvers
               isGenerating={isGenerating && generatingMessageId === m.id}
               groups={groups}
               onAssignGroup={handleAssignToGroup}
+              onCreateNewGroup={handleCreateNewGroup}
             />
           </div>
         );
@@ -627,11 +631,6 @@ export function ChatArea({ conversation, settings, serverConfig, onUpdateConvers
           <span className="text-[11px] text-text-muted ml-2">
             Context: {conversation.messages.filter(m => m.inContext).length} messages (~{tokenCount.toLocaleString()} tokens)
           </span>
-        </div>
-        <div className="flex gap-4">
-          <button onClick={handleCreateGroup} className="px-2 py-1 rounded border border-border-color bg-white cursor-pointer text-[11px] hover:bg-bg-base text-text-main">
-            New Group
-          </button>
         </div>
       </header>
 

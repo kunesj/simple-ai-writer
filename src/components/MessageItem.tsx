@@ -12,9 +12,10 @@ interface MessageItemProps {
   isGenerating?: boolean;
   groups?: {id: string, name: string}[];
   onAssignGroup?: (messageId: string, groupId: string | undefined) => void;
+  onCreateNewGroup?: (messageId: string) => void;
 }
 
-export const MessageItem = React.memo(function MessageItem({ message, onUpdate, onDelete, onRegenerate, isGenerating, groups, onAssignGroup }: MessageItemProps) {
+export const MessageItem = React.memo(function MessageItem({ message, onUpdate, onDelete, onRegenerate, isGenerating, groups, onAssignGroup, onCreateNewGroup }: MessageItemProps) {
   const [isEditingSummary, setIsEditingSummary] = useState(false);
   const [summaryDraft, setSummaryDraft] = useState(message.summary || '');
   
@@ -178,6 +179,16 @@ export const MessageItem = React.memo(function MessageItem({ message, onUpdate, 
                   {copied ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}
                   Copy to clipboard
                 </button>
+
+                {(groups || []).length === 0 && onCreateNewGroup && (
+                    <button
+                      onClick={() => { onCreateNewGroup(message.id); setShowMenu(false); }}
+                      className="px-3 py-2 text-left text-xs hover:bg-bg-base flex items-center gap-2 text-text-main cursor-pointer w-full"
+                    >
+                      <FolderPlus size={12} />
+                      Create group
+                    </button>
+                )}
                 
                 {showDeleteConfirm ? (
                   <div className="px-3 py-2 flex items-center justify-between bg-red-50 text-xs">
