@@ -217,11 +217,6 @@ export function Sidebar({ conversations, activeId, onSelect, onNew, onDelete, on
             </div>
         </div>
       </div>
-
-      <div className="p-5 border-t border-border-color text-xs text-text-muted">
-        Running on Linux x64<br/>
-        Disk Usage: Local Storage
-      </div>
     </aside>
   );
 }
