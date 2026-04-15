@@ -28,6 +28,7 @@ export function ChatArea({ conversation, settings, serverConfig, onUpdateConvers
 
   const [groupDeleteConfirmId, setGroupDeleteConfirmId] = useState<string | null>(null);
   const [tocMenuOpenId, setTocMenuOpenId] = useState<string | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [tocRenamingId, setTocRenamingId] = useState<string | null>(null);
   const [tocRenameValue, setTocRenameValue] = useState('');
   const [tocDeleteConfirmId, setTocDeleteConfirmId] = useState<string | null>(null);
@@ -68,6 +69,19 @@ export function ChatArea({ conversation, settings, serverConfig, onUpdateConvers
 
   const removeAttachment = (index: number) => {
     setAttachments(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const adjustTextareaHeight = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    textarea.style.height = 'auto';
+    const newHeight = Math.min(Math.max(textarea.scrollHeight, 160), window.innerHeight * 0.5);
+    textarea.style.height = `${newHeight}px`;
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+    setTimeout(adjustTextareaHeight, 0);
   };
 
   const scrollToBottom = () => {
@@ -740,48 +754,31 @@ export function ChatArea({ conversation, settings, serverConfig, onUpdateConvers
 
       <div className="p-2 px-8 bg-white border-t border-border-color shrink-0">
         <div className="max-w-4xl mx-auto">
-          {attachments.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-3">
-              {attachments.map((att, idx) => (
-                <div key={idx} className="flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-md text-xs border border-gray-200">
-                  <span className="truncate max-w-[150px] text-gray-700" title={att.name}>{att.name}</span>
-                  <button onClick={() => removeAttachment(idx)} className="text-gray-500 hover:text-red-500 cursor-pointer">
-                    <X size={14} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
           <div className="relative">
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleFileUpload} 
+              className="hidden" 
+              multiple 
+            />
+            <button 
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading || isGenerating}
+              className="absolute left-3 bottom-3 p-1.5 text-gray-400 hover:text-gray-600 rounded-md hover:bg-gray-100 disabled:opacity-50 transition-colors cursor-pointer"
+              title="Attach file"
+            >
+              {isUploading ? <Loader2 size={18} className="animate-spin" /> : <Paperclip size={18} />}
+            </button>
             <textarea
+              ref={textareaRef}
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={handleInputChange}
               onKeyDown={handleKeyDown}
               placeholder="Type a message or fiction prompt..."
-              className="w-full border border-border-color rounded-lg pl-4 pr-12 py-3 min-h-[80px] resize-none font-inherit text-sm outline-none focus:border-accent-primary text-text-main bg-white"
+              className="w-full border border-border-color rounded-lg pl-12 pr-36 py-3 min-h-[160px] max-h-[50vh] font-inherit text-sm outline-none focus:border-accent-primary text-text-main bg-white resize-none"
             />
-            <div className="absolute right-3 bottom-3 flex items-center gap-2">
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                onChange={handleFileUpload} 
-                className="hidden" 
-                multiple 
-              />
-              <button 
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading || isGenerating}
-                className="p-1.5 text-gray-400 hover:text-gray-600 rounded-md hover:bg-gray-100 disabled:opacity-50 transition-colors"
-                title="Attach file"
-              >
-                {isUploading ? <Loader2 size={18} className="animate-spin" /> : <Paperclip size={18} />}
-              </button>
-            </div>
-          </div>
-          <div className="flex justify-between items-center">
-            <div className="flex gap-5 items-center">
-            </div>
-            <div className="flex gap-2">
+            <div className="absolute right-3 bottom-3 flex gap-2">
               <button
                 onClick={() => handleAddMessage('user')}
                 disabled={!input.trim() || isGenerating}
@@ -804,6 +801,18 @@ export function ChatArea({ conversation, settings, serverConfig, onUpdateConvers
               </button>
             </div>
           </div>
+          {attachments.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {attachments.map((att, idx) => (
+                <div key={idx} className="flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-md text-xs border border-gray-200">
+                  <span className="truncate max-w-[150px] text-gray-700" title={att.name}>{att.name}</span>
+                  <button onClick={() => removeAttachment(idx)} className="text-gray-500 hover:text-red-500 cursor-pointer">
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </main>
