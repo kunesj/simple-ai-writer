@@ -156,6 +156,20 @@ export default function App() {
     });
   }, [activeId]);
 
+  const handleRenameConversation = (id: string, title: string) => {
+    setConversations(prev => {
+      const next = prev.map(c => {
+        if (c.id === id) {
+          const updatedConv = { ...c, title, updatedAt: Date.now() };
+          saveConversation(updatedConv);
+          return updatedConv;
+        }
+        return c;
+      });
+      return next;
+    });
+  };
+
   if (!isLoaded) {
     return <div className="h-screen flex items-center justify-center">Loading...</div>;
   }
@@ -174,6 +188,7 @@ export default function App() {
         onExport={handleExportConversation}
         onImport={handleImportConversation}
         onOpenSettings={() => setIsSettingsOpen(true)}
+        onRename={handleRenameConversation}
       />
       
       {activeConversation ? (
