@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Conversation, Settings } from './types';
 import { loadConversations, saveConversation, deleteConversation, loadSettings, saveSettings, defaultSettings, isSaveInProgress } from './lib/storage';
 import { Sidebar } from './components/Sidebar';
@@ -13,9 +13,11 @@ import { SettingsModal } from './components/SettingsModal';
 export default function App() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const activeIdRef = useRef<string | null>(null);
   const [settings, setSettings] = useState<Settings>(defaultSettings);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const initializedRef = useRef(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -28,6 +30,7 @@ export default function App() {
         setActiveId(loadedConvs[0].id);
       }
       setIsLoaded(true);
+      initializedRef.current = true;
     }
     init();
 
@@ -39,7 +42,11 @@ export default function App() {
     });
 
     eventSource.addEventListener('conversations_changed', async () => {
-      if (activeId && isSaveInProgress(activeId)) {
+      if (!initializedRef.current) {
+        return;
+      }
+      const currentActiveId = activeIdRef.current;
+      if (currentActiveId && isSaveInProgress(currentActiveId)) {
         return;
       }
       const loadedConvs = await loadConversations();
@@ -49,6 +56,10 @@ export default function App() {
     return () => {
       eventSource.close();
     };
+  }, []);
+
+  useEffect(() => {
+    activeIdRef.current = activeId;
   }, [activeId]);
 
   const handleNewConversation = () => {
