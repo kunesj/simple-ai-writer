@@ -92,6 +92,70 @@ function convertLlamaCppExport(data: LlamaCppExport): Conversation {
   };
 }
 
+interface GoogleAIChunk {
+  driveDocument?: { id: string };
+  text?: string;
+  role: string;
+  tokenCount?: number;
+  createTime?: string;
+  finishReason?: string;
+}
+
+interface GoogleAIExport {
+  runSettings?: {
+    temperature?: number;
+    topP?: number;
+    topK?: number;
+  };
+  systemInstruction?: Record<string, unknown>;
+  chunkedPrompt?: {
+    chunks: GoogleAIChunk[];
+    pendingInputs?: Array<{ role: string }>;
+  };
+}
+
+function convertGoogleAIExport(data: GoogleAIExport): { conversation: Conversation; settings: Settings } {
+  const settings: Settings = {
+    systemInstruction: data.systemInstruction ? '' : '',
+    temperature: data.runSettings?.temperature,
+    topP: data.runSettings?.topP,
+    topK: data.runSettings?.topK,
+  };
+
+  const chunks = data.chunkedPrompt?.chunks || [];
+  const messages: Message[] = chunks.map((chunk, index) => {
+    const content = chunk.text || '';
+
+    const message: Message = {
+      id: `msg-${index}-${chunk.createTime || Date.now()}`,
+      role: chunk.role === 'model' ? 'model' : chunk.role === 'user' ? 'user' : 'system',
+      content,
+      useSummary: false,
+      inContext: true,
+      isCollapsed: false,
+      timestamp: chunk.createTime ? new Date(chunk.createTime).getTime() : Date.now(),
+    };
+
+    if (chunk.tokenCount) {
+      message.stats = {
+        completionTokens: chunk.tokenCount,
+      };
+    }
+
+    return message;
+  });
+
+  const conversation: Conversation = {
+    id: `conv-${Date.now()}`,
+    title: '',
+    messages,
+    groups: [],
+    updatedAt: Date.now(),
+  };
+
+  return { conversation, settings };
+}
+
 export default function App() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -211,11 +275,19 @@ export default function App() {
         const parsed = JSON.parse(content);
         
         let newConv: Conversation;
+        let newSettings = settings;
         
         // Detect llama.cpp export format
         if (parsed.conv && parsed.messages && Array.isArray(parsed.messages)) {
           newConv = convertLlamaCppExport(parsed as LlamaCppExport);
-        } else {
+        } 
+        // Detect Google AI Studio export format
+        else if (parsed.chunkedPrompt && parsed.runSettings) {
+          const converted = convertGoogleAIExport(parsed as GoogleAIExport);
+          newConv = converted.conversation;
+          newSettings = converted.settings;
+        }
+        else {
           // Try our own format
           const importedConv = parsed as Conversation;
           if (importedConv && importedConv.messages && Array.isArray(importedConv.messages)) {
@@ -243,6 +315,11 @@ export default function App() {
           return next;
         });
         setActiveId(newConv.id);
+        
+        if (newSettings !== settings) {
+          setSettings(newSettings);
+          saveSettings(newSettings);
+        }
       } catch (error) {
         console.error('Failed to parse JSON:', error);
         setErrorMessage('Failed to parse conversation file.');
