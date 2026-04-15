@@ -112,14 +112,22 @@ export async function* generateChatStream(
     throw new Error('Missing required environment variables: VITE_OPENAI_BASE_URL and VITE_MODEL_NAME must be set');
   }
 
-  const requestBody = {
+  const requestBody: Record<string, unknown> = {
     model: modelName,
     messages: formattedMessages,
-    temperature: settings.temperature,
-    top_p: settings.topP,
     stream: true,
     stream_options: { include_usage: true }
   };
+
+  if (settings.temperature !== undefined) {
+    requestBody.temperature = settings.temperature;
+  }
+  if (settings.topP !== undefined) {
+    requestBody.top_p = settings.topP;
+  }
+  if (settings.topK !== undefined) {
+    requestBody.top_k = settings.topK;
+  }
 
   const requestDetails = {
     method: 'POST',

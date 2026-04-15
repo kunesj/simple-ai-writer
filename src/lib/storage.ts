@@ -2,9 +2,6 @@ import { Conversation, Settings } from '../types';
 
 export const defaultSettings: Settings = {
   systemInstruction: '',
-  temperature: 1,
-  topK: 64,
-  topP: 0.95,
 };
 
 export async function loadConversations(): Promise<Conversation[]> {

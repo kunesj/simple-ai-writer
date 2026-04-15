@@ -15,6 +15,16 @@ export function SettingsModal({ settings, onSave, onClose }: SettingsModalProps)
     setDraft(prev => ({ ...prev, [field]: value }));
   };
 
+  const formatNumber = (value: number | undefined): string => {
+    return value !== undefined ? String(value) : '';
+  };
+
+  const parseNumber = (value: string): number | undefined => {
+    if (value === '') return undefined;
+    const num = parseFloat(value);
+    return isNaN(num) ? undefined : num;
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl flex flex-col max-h-[90vh]">
@@ -38,42 +48,45 @@ export function SettingsModal({ settings, onSave, onClose }: SettingsModalProps)
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="flex flex-col gap-2">
-              <label className="font-medium text-sm text-gray-700 flex justify-between">
+              <label className="font-medium text-sm text-gray-700">
                 <span>Temperature</span>
-                <span className="text-gray-500">{draft.temperature}</span>
+                <span className="text-gray-500 font-normal ml-2">(0-2, empty = default)</span>
               </label>
               <input 
-                type="range" 
-                min="0" max="2" step="0.1" 
-                value={draft.temperature}
-                onChange={(e) => handleChange('temperature', parseFloat(e.target.value))}
-                className="w-full"
+                type="number" 
+                min="0" max="2" step="0.1"
+                value={formatNumber(draft.temperature)}
+                onChange={(e) => handleChange('temperature', parseNumber(e.target.value))}
+                className="border rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="default"
               />
             </div>
             <div className="flex flex-col gap-2">
-              <label className="font-medium text-sm text-gray-700 flex justify-between">
+              <label className="font-medium text-sm text-gray-700">
                 <span>Top K</span>
-                <span className="text-gray-500">{draft.topK}</span>
+                <span className="text-gray-500 font-normal ml-2">(1-100, empty = default)</span>
               </label>
               <input 
-                type="range" 
-                min="1" max="100" step="1" 
-                value={draft.topK}
-                onChange={(e) => handleChange('topK', parseInt(e.target.value))}
-                className="w-full"
+                type="number" 
+                min="1" max="100" step="1"
+                value={formatNumber(draft.topK)}
+                onChange={(e) => handleChange('topK', parseNumber(e.target.value))}
+                className="border rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="default"
               />
             </div>
             <div className="flex flex-col gap-2">
-              <label className="font-medium text-sm text-gray-700 flex justify-between">
+              <label className="font-medium text-sm text-gray-700">
                 <span>Top P</span>
-                <span className="text-gray-500">{draft.topP}</span>
+                <span className="text-gray-500 font-normal ml-2">(0-1, empty = default)</span>
               </label>
               <input 
-                type="range" 
-                min="0" max="1" step="0.05" 
-                value={draft.topP}
-                onChange={(e) => handleChange('topP', parseFloat(e.target.value))}
-                className="w-full"
+                type="number" 
+                min="0" max="1" step="0.05"
+                value={formatNumber(draft.topP)}
+                onChange={(e) => handleChange('topP', parseNumber(e.target.value))}
+                className="border rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="default"
               />
             </div>
           </div>

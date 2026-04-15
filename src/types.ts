@@ -51,7 +51,7 @@ export interface Conversation {
 
 export interface Settings {
   systemInstruction: string;
-  temperature: number;
-  topK: number;
-  topP: number;
+  temperature?: number;
+  topK?: number;
+  topP?: number;
 }
