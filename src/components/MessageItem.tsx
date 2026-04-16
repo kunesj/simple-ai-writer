@@ -48,8 +48,7 @@ export const MessageItem = React.memo(function MessageItem({ message, onUpdate, 
   const handleToggleContext = () => {
     const newInContext = !message.inContext;
     onUpdate(message.id, { 
-      inContext: newInContext,
-      isCollapsed: !newInContext ? true : message.isCollapsed 
+      inContext: newInContext
     });
   };
 
