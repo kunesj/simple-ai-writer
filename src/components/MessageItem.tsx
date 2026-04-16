@@ -80,11 +80,16 @@ export const MessageItem = React.memo(function MessageItem({ message, onUpdate, 
   return (
     <div className={cn(
       "bg-white border border-border-color rounded-lg p-4 relative transition-shadow mb-3",
-      !message.inContext && "bg-bg-base border-dashed opacity-60"
-    )}>
-      <div className="flex justify-between items-center mb-3 text-xs font-semibold text-text-muted uppercase">
+      !message.inContext && "bg-red-50 border-red-200",
+      message.inContext && message.useSummary && "bg-blue-50 border-blue-200"
+    )}
+    >
+      <div className="flex justify-between items-center text-xs font-semibold text-text-muted uppercase">
         <div className="flex items-center gap-2">
           <span>{message.role === 'model' ? 'AI ASSISTANT' : message.role}</span>
+          {message.isCollapsed && (
+            <span>[COLLAPSED]</span>
+          )}
           {isGenerating && (
             <Loader2 size={12} className="animate-spin text-accent-primary" />
           )}
@@ -240,7 +245,7 @@ export const MessageItem = React.memo(function MessageItem({ message, onUpdate, 
       </div>
 
       {!message.isCollapsed ? (
-        <div className="text-sm leading-[1.6] text-text-main">
+        <div className="mt-3 text-sm leading-[1.6] text-text-main">
           {message.useSummary ? (
             <div className="italic text-accent-primary border-l-2 border-accent-primary pl-3">
               <div className="flex justify-between items-center mb-2">
