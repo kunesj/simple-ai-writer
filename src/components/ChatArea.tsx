@@ -127,6 +127,25 @@ export function ChatArea({ conversation, settings, serverConfig, onUpdateConvers
     }));
   }, [onUpdateConversation]);
 
+  const handleInsertMessageAfter = (afterId: string, role: 'user' | 'model') => {
+    const newMessage: Message = {
+      id: Date.now().toString(),
+      role,
+      content: '',
+      useSummary: false,
+      inContext: true,
+      isCollapsed: false,
+      timestamp: Date.now(),
+    };
+    const idx = conversation.messages.findIndex(m => m.id === afterId);
+    const newMessages = [
+      ...conversation.messages.slice(0, idx + 1),
+      newMessage,
+      ...conversation.messages.slice(idx + 1)
+    ];
+    onUpdateConversation({ messages: newMessages });
+  };
+
   const handleAddMessage = (role: 'user' | 'model') => {
     if (!input.trim() && attachments.length === 0) return;
     const newMessage: Message = {
@@ -538,9 +557,10 @@ export function ChatArea({ conversation, settings, serverConfig, onUpdateConvers
                       onDelete={handleDeleteMessage} 
                       onRegenerate={handleRegenerate}
                       isGenerating={isGenerating && generatingMessageId === msg.id}
-groups={groups}
+                      groups={groups}
                       onAssignGroup={handleAssignToGroup}
                       onCreateNewGroup={handleCreateNewGroup}
+                      onInsertAfter={(role) => handleInsertMessageAfter(msg.id, role)}
                     />
                   </div>
                 ))}
@@ -562,6 +582,7 @@ groups={groups}
               groups={groups}
               onAssignGroup={handleAssignToGroup}
               onCreateNewGroup={handleCreateNewGroup}
+              onInsertAfter={(role) => handleInsertMessageAfter(m.id, role)}
             />
           </div>
         );

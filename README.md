@@ -28,7 +28,7 @@ Supports any backed with OpenAI-compatible API.
 ### Google Gemini API
 ```
 Base URL: https://generativelanguage.googleapis.com/v1beta/openai/
-Model Name: gemini-3.1-flash-lite-preview
+Model Name: gemini-3-flash-preview
 API Key: your-api-key
 ```
 

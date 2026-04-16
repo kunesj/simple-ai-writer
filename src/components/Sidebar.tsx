@@ -189,7 +189,9 @@ export function Sidebar({ conversations, activeId, onSelect, onNew, onDelete, on
                         <div className="h-px bg-border-color my-1" />
                         <button
                           onClick={() => {
-                            onDelete(conv.id);
+                            if (window.confirm('Are you sure you want to delete this conversation?')) {
+                              onDelete(conv.id);
+                            }
                             setOpenMenuId(null);
                           }}
                           className="w-full px-3 py-2 text-left text-xs hover:bg-red-50 flex items-center gap-2 text-red-500 cursor-pointer"

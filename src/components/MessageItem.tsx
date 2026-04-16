@@ -13,9 +13,10 @@ interface MessageItemProps {
   groups?: {id: string, name: string}[];
   onAssignGroup?: (messageId: string, groupId: string | undefined) => void;
   onCreateNewGroup?: (messageId: string) => void;
+  onInsertAfter?: (role: 'user' | 'model') => void;
 }
 
-export const MessageItem = React.memo(function MessageItem({ message, onUpdate, onDelete, onRegenerate, isGenerating, groups, onAssignGroup, onCreateNewGroup }: MessageItemProps) {
+export const MessageItem = React.memo(function MessageItem({ message, onUpdate, onDelete, onRegenerate, isGenerating, groups, onAssignGroup, onCreateNewGroup, onInsertAfter }: MessageItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(message.content);
   const [editingSummary, setEditingSummary] = useState(false);
@@ -167,7 +168,7 @@ export const MessageItem = React.memo(function MessageItem({ message, onUpdate, 
             </button>
             
             {showMenu && (
-              <div className="absolute right-0 top-full mt-1 bg-white border border-border-color shadow-lg rounded-md py-1 z-10 w-48 max-h-64 overflow-y-auto flex flex-col">
+              <div className="absolute right-0 top-full mt-1 bg-white border border-border-color shadow-lg rounded-md py-1 z-10 w-64 max-h-128 overflow-y-auto flex flex-col">
                 <button
                   onClick={() => { handleCopy(); setShowMenu(false); }}
                   className="px-3 py-2 text-left text-xs hover:bg-bg-base flex items-center gap-2 text-text-main cursor-pointer"
@@ -176,16 +177,61 @@ export const MessageItem = React.memo(function MessageItem({ message, onUpdate, 
                   Copy to clipboard
                 </button>
 
-                {(groups || []).length === 0 && onCreateNewGroup && (
+                {onInsertAfter && (
+                  <>
+                    <button
+                      onClick={() => { onInsertAfter('user'); setShowMenu(false); }}
+                      className="px-3 py-2 text-left text-xs hover:bg-bg-base flex items-center gap-2 text-text-main cursor-pointer"
+                    >
+                      <AlignLeft size={12} />
+                      Add user message
+                    </button>
+                    <button
+                      onClick={() => { onInsertAfter('model'); setShowMenu(false); }}
+                      className="px-3 py-2 text-left text-xs hover:bg-bg-base flex items-center gap-2 text-text-main cursor-pointer"
+                    >
+                      <Brain size={12} />
+                      Add model message
+                    </button>
+                  </>
+                )}
+
+                {groups && groups.length > 0 && onAssignGroup && onCreateNewGroup && (
+                  <>
+                    <div className="h-px bg-border-color my-1" />
+
                     <button
                       onClick={() => { onCreateNewGroup(message.id); setShowMenu(false); }}
                       className="px-3 py-2 text-left text-xs hover:bg-bg-base flex items-center gap-2 text-text-main cursor-pointer w-full"
                     >
                       <FolderPlus size={12} />
-                      Create group
+                      Create new group
                     </button>
+
+                    {groups.map(g => (
+                      (g.id === message.groupId) ? (
+                        <button
+                          onClick={() => { onAssignGroup(message.id, undefined); setShowMenu(false); }}
+                          className="px-3 py-2 text-left text-xs hover:bg-bg-base flex items-center gap-2 text-text-main cursor-pointer"
+                        >
+                          <FolderMinus size={12} className="shrink-0" />
+                          Remove from "{g.name}"
+                        </button>
+                      ) : (
+                        <button
+                          key={g.id}
+                          onClick={() => { onAssignGroup(message.id, g.id); setShowMenu(false); }}
+                          className="px-3 py-2 text-left text-xs hover:bg-bg-base flex items-center gap-2 text-text-main cursor-pointer"
+                        >
+                          <FolderPlus size={12} className="shrink-0" />
+                          Add to "{g.name}"
+                        </button>
+                      )
+                    ))}
+                  </>
                 )}
-                
+
+                <div className="h-px bg-border-color my-1" />
                 {showDeleteConfirm ? (
                   <div className="px-3 py-2 flex items-center justify-between bg-red-50 text-xs">
                     <span className="text-red-600 font-bold">Delete?</span>
@@ -202,32 +248,6 @@ export const MessageItem = React.memo(function MessageItem({ message, onUpdate, 
                     <Trash2 size={12} />
                     Delete
                   </button>
-                )}
-
-                {groups && groups.length > 0 && onAssignGroup && (
-                  <>
-                    <div className="h-px bg-border-color my-1" />
-                    <div className="px-3 py-1 text-[10px] font-bold text-text-muted uppercase">Groups</div>
-                    {message.groupId && (
-                      <button
-                        onClick={() => { onAssignGroup(message.id, undefined); setShowMenu(false); }}
-                        className="px-3 py-2 text-left text-xs hover:bg-bg-base flex items-center gap-2 text-text-main cursor-pointer"
-                      >
-                        <FolderMinus size={12} />
-                        Remove from Group
-                      </button>
-                    )}
-                    {groups.filter(g => g.id !== message.groupId).map(g => (
-                      <button
-                        key={g.id}
-                        onClick={() => { onAssignGroup(message.id, g.id); setShowMenu(false); }}
-                        className="px-3 py-2 text-left text-xs hover:bg-bg-base flex items-center gap-2 text-text-main truncate cursor-pointer"
-                      >
-                        <FolderPlus size={12} className="shrink-0" />
-                        <span className="truncate">Add to {g.name}</span>
-                      </button>
-                    ))}
-                  </>
                 )}
               </div>
             )}
