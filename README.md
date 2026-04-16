@@ -2,7 +2,7 @@
 
 A full-stack AI chat application that is optimized for writing fiction and manual context management.
 
-**Declaimer**: This projects is 95% vibe-coded "AI slop", because nobody should be forced to write JS. Use at your own risk.
+**Declaimer**: This projects is like 90% vibe-coded "AI slop" (nobody should be forced to write JS), so use it at your own risk.
 
 ## Features
 

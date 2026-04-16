@@ -16,11 +16,9 @@ interface MessageItemProps {
 }
 
 export const MessageItem = React.memo(function MessageItem({ message, onUpdate, onDelete, onRegenerate, isGenerating, groups, onAssignGroup, onCreateNewGroup }: MessageItemProps) {
-  const [isEditingSummary, setIsEditingSummary] = useState(false);
-  const [summaryDraft, setSummaryDraft] = useState(message.summary || '');
-  
-  const [isEditingContent, setIsEditingContent] = useState(false);
-  const [contentDraft, setContentDraft] = useState(message.content);
+  const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState(message.content);
+  const [editingSummary, setEditingSummary] = useState(false);
   
   const [showThinking, setShowThinking] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -56,14 +54,13 @@ export const MessageItem = React.memo(function MessageItem({ message, onUpdate, 
     onUpdate(message.id, { useSummary: !message.useSummary });
   };
 
-  const handleSaveSummary = () => {
-    onUpdate(message.id, { summary: summaryDraft });
-    setIsEditingSummary(false);
-  };
-
-  const handleSaveContent = () => {
-    onUpdate(message.id, { content: contentDraft });
-    setIsEditingContent(false);
+  const handleSave = () => {
+    if (editingSummary) {
+      onUpdate(message.id, { summary: draft });
+    } else {
+      onUpdate(message.id, { content: draft });
+    }
+    setIsEditing(false);
   };
 
   const handleCopy = () => {
@@ -84,16 +81,17 @@ export const MessageItem = React.memo(function MessageItem({ message, onUpdate, 
     )}
     >
       <div className="flex justify-between items-center text-xs font-semibold text-text-muted uppercase">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 cursor-pointer" onClick={handleToggleCollapse}>
+          <span className="pb-1">
+            {message.isCollapsed ? <ChevronRight size={21} /> : <ChevronDown size={21} />}
+          </span>
           <span>{message.role === 'model' ? 'AI ASSISTANT' : message.role}</span>
-          {message.isCollapsed && (
-            <span>[COLLAPSED]</span>
-          )}
+
           {isGenerating && (
-            <Loader2 size={12} className="animate-spin text-accent-primary" />
+            <Loader2 size={21} className="animate-spin text-accent-primary" />
           )}
         </div>
-        
+
         <div className="flex gap-2">
           {onRegenerate && (
             showRegenerateConfirm ? (
@@ -127,8 +125,9 @@ export const MessageItem = React.memo(function MessageItem({ message, onUpdate, 
           )}
           <button
             onClick={() => {
-              setContentDraft(message.content);
-              setIsEditingContent(!isEditingContent);
+              setDraft(message.useSummary ? (message.summary || '') : message.content);
+              setEditingSummary(message.useSummary);
+              setIsEditing(!isEditing);
             }}
             className="px-2 py-1 rounded border border-border-color bg-white cursor-pointer text-[11px] hover:bg-bg-base flex items-center gap-1 text-text-main"
             title="Edit message"
@@ -157,14 +156,7 @@ export const MessageItem = React.memo(function MessageItem({ message, onUpdate, 
           >
             {message.inContext ? <Eye size={12} /> : <EyeOff size={12} />}
           </button>
-          <button
-            onClick={handleToggleCollapse}
-            className="px-2 py-1 rounded border border-border-color bg-white cursor-pointer text-[11px] hover:bg-bg-base flex items-center gap-1 text-text-main"
-            title={message.isCollapsed ? 'Expand' : 'Collapse'}
-          >
-            {message.isCollapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
-          </button>
-          
+
           <div className="relative" ref={menuRef}>
             <button
               onClick={() => setShowMenu(!showMenu)}
@@ -246,34 +238,25 @@ export const MessageItem = React.memo(function MessageItem({ message, onUpdate, 
       {!message.isCollapsed ? (
         <div className="mt-3 text-sm leading-[1.6] text-text-main">
           {message.useSummary ? (
-            <div className="italic text-accent-primary border-l-2 border-accent-primary pl-3">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-[11px] font-semibold uppercase tracking-wider opacity-70">Summary Version</span>
-                <button 
-                  onClick={() => setIsEditingSummary(!isEditingSummary)}
-                  className="text-accent-primary hover:opacity-80 cursor-pointer"
-                >
-                  <Edit2 size={12} />
-                </button>
-              </div>
-              {isEditingSummary ? (
+            <>
+              {isEditing && editingSummary ? (
                 <div className="flex flex-col gap-2 mt-2 not-italic">
                   <textarea
-                    value={summaryDraft}
-                    onChange={(e) => setSummaryDraft(e.target.value)}
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
                     className="w-full p-2 border border-border-color rounded text-sm focus:border-accent-primary outline-none text-text-main"
                     rows={3}
                     placeholder="Write a summary..."
                   />
                   <div className="flex justify-end gap-2">
                     <button 
-                      onClick={() => setIsEditingSummary(false)}
+                      onClick={() => setIsEditing(false)}
                       className="px-3 py-1 text-xs text-text-muted hover:bg-gray-100 rounded border border-border-color"
                     >
                       Cancel
                     </button>
                     <button 
-                      onClick={handleSaveSummary}
+                      onClick={handleSave}
                       className="px-3 py-1 text-xs bg-accent-primary text-white rounded hover:bg-accent-primary/90"
                     >
                       Save
@@ -285,7 +268,7 @@ export const MessageItem = React.memo(function MessageItem({ message, onUpdate, 
                   {message.summary || <span className="opacity-50">No summary written yet. Click edit to add one.</span>}
                 </div>
               )}
-            </div>
+            </>
           ) : (
             <div className="prose prose-sm max-w-none text-text-main">
               {message.thought && (
@@ -339,24 +322,24 @@ export const MessageItem = React.memo(function MessageItem({ message, onUpdate, 
                 </div>
               )}
               
-              {isEditingContent ? (
+              {isEditing && !editingSummary ? (
                 <div className="flex flex-col gap-2 mt-2 not-italic">
                   <textarea
-                    value={contentDraft}
-                    onChange={(e) => setContentDraft(e.target.value)}
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
                     className="w-full p-2 border border-border-color rounded text-sm focus:border-accent-primary outline-none text-text-main font-mono"
                     rows={6}
                     placeholder="Write message content..."
                   />
                   <div className="flex justify-end gap-2">
                     <button 
-                      onClick={() => setIsEditingContent(false)}
+                      onClick={() => setIsEditing(false)}
                       className="px-3 py-1 text-xs text-text-muted hover:bg-gray-100 rounded border border-border-color"
                     >
                       Cancel
                     </button>
                     <button 
-                      onClick={handleSaveContent}
+                      onClick={handleSave}
                       className="px-3 py-1 text-xs bg-accent-primary text-white rounded hover:bg-accent-primary/90"
                     >
                       Save
