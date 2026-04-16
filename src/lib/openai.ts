@@ -1,4 +1,3 @@
-import { encode } from 'gpt-tokenizer';
 import { Message, Settings, ServerConfig } from '../types';
 
 export class ApiError extends Error {
@@ -14,20 +13,13 @@ export class ApiError extends Error {
   }
 }
 
-export async function countTokens(messages: Message[], _settings: Settings): Promise<number> {
+export function countTokens(messages: Message[], _settings: Settings): number {
   const contextMessages = messages.filter((m) => m.inContext);
   if (contextMessages.length === 0) return 0;
-  
+
   const text = contextMessages.map(m => m.useSummary && m.summary ? m.summary : m.content).join('\n\n');
-  
-  try {
-    const tokens = encode(text);
-    return tokens.length;
-  } catch (e) {
-    console.error("Token counting failed:", e);
-    // Fallback estimate
-    return Math.ceil(text.length / 4);
-  }
+
+  return Math.ceil(text.length / 4);
 }
 
 export async function* generateChatStream(

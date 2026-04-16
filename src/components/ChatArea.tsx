@@ -94,7 +94,11 @@ export function ChatArea({ conversation, settings, serverConfig, onUpdateConvers
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      countTokens(conversation.messages, settings).then(setTokenCount).catch(console.error);
+      try {
+        setTokenCount(countTokens(conversation.messages, settings));
+      } catch (e) {
+        console.error(e);
+      }
     }, 1000);
     return () => clearTimeout(timer);
   }, [conversation.messages, settings]);
